@@ -204,6 +204,7 @@ window.addEventListener('load', function() {
     document.body.appendChild(app.view);
 
     //Preload needed assets - setup function is ran within after assets are loaded.
+    //Button presses have functions which are called on press.
     preload();
     
 })
@@ -351,6 +352,8 @@ function decreaseBigStake()
 
 function spinSlots()
 {
+    disableButtons();
+
     //Take stake from balance and display the new balance
     balance = parseFloat((balance - stake).toFixed(2));
     labels["balance"].text = "Balance: " + balance;
@@ -364,14 +367,10 @@ function spinSlots()
                     app.stage.removeChild(spines[i][j]);
                 }
         }
-    for(const key of Object.keys(labels))
-        {
-            labels[key].interactive = false;
-        }
-    
     //Randomly select response from dummy JSON
     let response = data[Math.floor(Math.random() * data.length)].response.results;
 
+    //Add needed symbols to stage
     let fruits = [0, 0, 0, 0, 0, 0];
     for(let i = 0; i < response.symbolIDs.length; i++)
         {
@@ -416,6 +415,9 @@ function spinSlots()
                     console.log("Default selected for displaying slot results - Column " + i);
             }
         }
+        gsap.to(spines, {y: config.height / 2 - 50, duration: 0.5});
+        gsap.to(spines, {y: config.height / 2, duration: 0.5, delay: 0.5});
+        setTimeout(enableButtons, 1000);
 
     //Add win to balance if there no win nothing will be added to the balance
     if(response.win != 0)
@@ -425,6 +427,8 @@ function spinSlots()
             labels["balance"].text = "Balance: " + balance;
             labels["win"].text = "You've Won!";
             labels["win"].position.set(config.width / 2 - labels["win"].width / 2, 150)
+            gsap.to(labels["win"], {y: labels["win"].position.y + 20, duration: 0.5});
+            gsap.to(labels["win"], {y: labels["win"].position.y, duration: 0.5, delay: 0.5});
 
             //make winning symbols animate
             let winningSymbol = 0;
@@ -449,12 +453,24 @@ function spinSlots()
         labels["win"].text = "Better luck next time!";
         labels["win"].position.set(config.width / 2 - labels["win"].width / 2, 150)
     }
-        //interactivity readded for buttons after spin completion
-        for(const key of Object.keys(labels))
-            {
-                if(key != "balance" && key != "stake" && key != "win")
-                    {
-                        labels[key].interactive = true;
-                    }
-            }  
+}
+
+function enableButtons()
+{
+    //interactivity readded for buttons after spin completion
+    for(const key of Object.keys(labels))
+        {
+            if(key != "balance" && key != "stake" && key != "win")
+                {
+                    labels[key].interactive = true;
+                }
+        }  
+}
+
+function disableButtons()
+{
+    for(const key of Object.keys(labels))
+        {
+            labels[key].interactive = false;
+        }
 }
